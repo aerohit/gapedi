@@ -1,5 +1,6 @@
 (ns experimental.simple-server
-  (:require [org.httpkit.server :as hk]))
+  (:require [org.httpkit.server :as hk]
+            [org.httpkit.timer  :as timer]))
 
 (defn hello-app [req]
   {:status  200
@@ -23,8 +24,22 @@
     (hk/on-receive channel (fn [data]
                              (hk/send! channel data)))))
 
+(defn streaming-handler [req]
+  (hk/with-channel req channel
+    (hk/on-close channel (fn [status]
+                           (println "channel closed, " status)))
+    (loop [id 0]
+      (when (< id 10)
+        (timer/schedule-task (* id 200)
+                             (hk/send! channel (str "message from server #" id) false))
+        (recur (inc id))))
+    (timer/schedule-task 10000 (hk/close channel))))
+
 ;(defn -main [& args]
   ;(reset! stop-server-lambda (hk/run-server hello-app {:port 8080})))
 
+;(defn -main [& args]
+  ;(hk/run-server unified-handler {:port 8080}))
+
 (defn -main [& args]
-  (hk/run-server unified-handler {:port 8080}))
+  (hk/run-server streaming-handler {:port 8080}))
