@@ -35,11 +35,20 @@
         (recur (inc id))))
     (timer/schedule-task 10000 (hk/close channel))))
 
+(defn ws-handler [req]
+  (hk/with-channel req channel
+    (hk/on-close channel (fn [status]
+                           (println "channel closed, " status)))
+    (hk/on-receive channel (fn [data]
+                             (hk/send! channel data)))))
 ;(defn -main [& args]
   ;(reset! stop-server-lambda (hk/run-server hello-app {:port 8080})))
 
 ;(defn -main [& args]
   ;(hk/run-server unified-handler {:port 8080}))
 
+;(defn -main [& args]
+  ;(hk/run-server streaming-handler {:port 8080}))
+
 (defn -main [& args]
-  (hk/run-server streaming-handler {:port 8080}))
+  (hk/run-server ws-handler {:port 9090}))
