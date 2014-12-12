@@ -1,7 +1,7 @@
 (ns experimental.simple-server
   (:require [org.httpkit.server :as hk]))
 
-(defn app [req]
+(defn hello-app [req]
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    "hello HTTP!"})
@@ -14,4 +14,4 @@
     (reset! stop-server-lambda nil)))
 
 (defn -main [& args]
-  (reset! stop-server-lambda (hk/run-server app {:port 8080})))
+  (reset! stop-server-lambda (hk/run-server hello-app {:port 8080})))
